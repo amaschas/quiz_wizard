@@ -1,6 +1,16 @@
 import cors from "@fastify/cors";
 import fastify from "fastify";
+import { FastifyRequest } from 'fastify';
 import { db } from "./db-client";
+
+interface SubmitAnswerBody {
+	user_id: number;
+	quiz_id: number;
+	answer_id: number;
+	question_answer_index?: number;
+	question_type?: string;
+	ms_on_question?: number;
+  }
 
 const server = fastify();
 
@@ -36,9 +46,78 @@ server.get("/quizzes/:id", (request, reply) => {
 	}
 });
 
-server.post("qyizzes/submit-answer/:quiz_id/:question_id", (request, reply) => {
-	
-})
+server.get("/quizzes/answers/:user_id/:question_id", (request, reply) => {
+	const query = db.prepare(
+		"SELECT * FROM assignment_answers WHERE user_id = :user_id AND assignment_question_id = :question_id"
+	);
+	const quiz_data = query.get(request.params) || {};
+
+	return {
+		...quiz_data
+	}
+});
+
+server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: SubmitAnswerBody }>, reply) => {
+	console.log(request.body)
+	const {
+		user_id,
+		quiz_id,
+		answer_id,
+		question_answer_index = -1,
+		question_type = 'multiple-choice',
+		ms_on_question = 0
+	} = request.body;
+  
+	if (!user_id || !quiz_id || !answer_id) {
+	  return reply.code(400).send({ error: 'user_id, quiz_id, and answer_id are required' });
+	}
+
+	// Update indicated answer and question set active
+	const insertAnswer = db.prepare(`
+		INSERT INTO assignment_answers (
+			user_id,
+			assignment_id,
+			assignment_question_id,
+			assignment_question_answer_index,
+			is_active,
+			ms_on_question
+		)
+		VALUES (
+			:user_id,
+			:assignment_id,
+			:assignment_question_id,
+			:assignment_question_answer_index,
+			1,
+			:ms_on_question
+		)
+		ON CONFLICT(user_id, assignment_id, assignment_question_id)
+		DO UPDATE SET
+			assignment_question_answer_index = :assignment_question_answer_index,
+			ms_on_question = :ms_on_question,
+			is_active = 1;
+	`);
+
+	const updateOtherAnswers = db.prepare(`
+		UPDATE assignment_answers
+		SET is_active = 0
+		WHERE assignment_id != @assignment_id
+		  AND assignment_question_id = @assignment_question_id
+	`);
+  
+
+	const transaction = db.transaction((params) => {
+		updateOtherAnswers.run(params);
+		insertAnswer.run(params);
+	});
+
+	transaction({
+		user_id: user_id,
+		assignment_id: quiz_id,
+		assignment_question_id: answer_id,
+		assignment_question_answer_index: question_answer_index,
+		ms_on_question: ms_on_question,
+	});
+});  
 
 server.listen({ port: PORT, host: '0.0.0.0' }, (err) => {
 	if (err) {
