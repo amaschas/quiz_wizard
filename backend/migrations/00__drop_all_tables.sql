@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS assignment_answers;
-DROP TABLE IF EXISTS assignment_states;
-DROP TABLE IF EXISTS assignment_questions;
-DROP TABLE IF EXISTS assignments;
+DROP TABLE IF EXISTS quiz_answers;
+DROP TABLE IF EXISTS quiz_states;
+DROP TABLE IF EXISTS quiz_questions;
+DROP TABLE IF EXISTS quizzes;
 DROP TABLE IF EXISTS users;

@@ -29,15 +29,15 @@ server.get("/users", (_request, reply) => {
 });
 
 server.get("/quizzes", (_request, reply) => {
-	const data = db.prepare("SELECT * FROM assignments").all();
+	const data = db.prepare("SELECT * FROM quizzes").all();
 
 	return data;
 });
 
 server.get("/quizzes/:id", (request, reply) => {
-	const quiz_data_query = db.prepare("SELECT * FROM assignments WHERE id = :id");
+	const quiz_data_query = db.prepare("SELECT * FROM quizzes WHERE id = :id");
 	const quiz_data = quiz_data_query.get(request.params) || {};
-	const question_data_query = db.prepare("SELECT * FROM assignment_questions WHERE assignment_id = :id");
+	const question_data_query = db.prepare("SELECT * FROM quiz_questions WHERE quiz_id = :id");
 	const question_data = question_data_query.all(request.params) || {};
 
 	return {
@@ -48,7 +48,7 @@ server.get("/quizzes/:id", (request, reply) => {
 
 server.get("/quizzes/answers/:user_id/:question_id", (request, reply) => {
 	const query = db.prepare(
-		"SELECT * FROM assignment_answers WHERE user_id = :user_id AND assignment_question_id = :question_id"
+		"SELECT * FROM quiz_answers WHERE user_id = :user_id AND quiz_question_id = :question_id"
 	);
 	const quiz_data = query.get(request.params) || {};
 
@@ -74,34 +74,34 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 
 	// Update indicated answer and question set active
 	const insertAnswer = db.prepare(`
-		INSERT INTO assignment_answers (
+		INSERT INTO quiz_answers (
 			user_id,
-			assignment_id,
-			assignment_question_id,
-			assignment_question_answer_index,
+			quiz_id,
+			quiz_question_id,
+			quiz_question_answer_index,
 			is_active,
 			ms_on_question
 		)
 		VALUES (
 			:user_id,
-			:assignment_id,
-			:assignment_question_id,
-			:assignment_question_answer_index,
+			:quiz_id,
+			:quiz_question_id,
+			:quiz_question_answer_index,
 			1,
 			:ms_on_question
 		)
-		ON CONFLICT(user_id, assignment_id, assignment_question_id)
+		ON CONFLICT(user_id, quiz_id, quiz_question_id)
 		DO UPDATE SET
-			assignment_question_answer_index = :assignment_question_answer_index,
+			quiz_question_answer_index = :quiz_question_answer_index,
 			ms_on_question = :ms_on_question,
 			is_active = 1;
 	`);
 
 	const updateOtherAnswers = db.prepare(`
-		UPDATE assignment_answers
+		UPDATE quiz_answers
 		SET is_active = 0
-		WHERE assignment_id != @assignment_id
-		  AND assignment_question_id = @assignment_question_id
+		WHERE quiz_id != @quiz_id
+		  AND quiz_question_id = @quiz_question_id
 	`);
   
 
@@ -112,9 +112,9 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 
 	transaction({
 		user_id: user_id,
-		assignment_id: quiz_id,
-		assignment_question_id: answer_id,
-		assignment_question_answer_index: question_answer_index,
+		quiz_id: quiz_id,
+		quiz_question_id: answer_id,
+		quiz_question_answer_index: question_answer_index,
 		ms_on_question: ms_on_question,
 	});
 });  

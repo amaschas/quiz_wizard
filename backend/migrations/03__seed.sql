@@ -7,28 +7,28 @@ VALUES
   ('Alice Johnson', 'alice@example.com'),
   ('Bob Brown', 'bob@example.com');
 
--- Create test assignments
+-- Create test quizzes
 INSERT INTO
-  assignments (title)
+  quizzes (title)
 VALUES
   ('Basic Skeletal System Quiz'),
   ('Cardiovascular System Basics'),
   ('Digestive System Overview');
 
 -- Create questions for Skeletal System Quiz
-INSERT INTO assignment_questions (assignment_id, question_content, choices)
+INSERT INTO quiz_questions (quiz_id, question_content, quiz_answer_choices)
 SELECT
   (
     SELECT id
-    FROM assignments
+    FROM quizzes
     WHERE title = 'Basic Skeletal System Quiz'
   ),
   q.question_content,
-  q.choices
+  q.quiz_answer_choices
 FROM (
   SELECT
     'Which bone is the longest in the human body?' AS question_content,
-    'Femur;;Tibia;;Humerus;;Fibula' AS choices
+    'Femur;;Tibia;;Humerus;;Fibula' AS quiz_answer_choices
   UNION ALL
   SELECT 'How many bones are in the adult human body?', '206;;186;;226;;196'
   UNION ALL
@@ -40,19 +40,19 @@ FROM (
 ) AS q;
 
 -- Create questions for Cardiovascular Quiz
-INSERT INTO assignment_questions (assignment_id, question_content, choices)
+INSERT INTO quiz_questions (quiz_id, question_content, quiz_answer_choices)
 SELECT
   (
     SELECT id
-    FROM assignments
+    FROM quizzes
     WHERE title = 'Cardiovascular System Basics'
   ),
   q.question_content,
-  q.choices
+  q.quiz_answer_choices
 FROM (
   SELECT
     'Which chamber of the heart pumps blood to the body?' AS question_content,
-    'Left ventricle;;Right ventricle;;Left atrium;;Right atrium' AS choices
+    'Left ventricle;;Right ventricle;;Left atrium;;Right atrium' AS quiz_answer_choices
   UNION ALL
   SELECT 'What is the main function of red blood cells?', 'Carry oxygen;;Fight infection;;Form blood clots;;Produce antibodies'
   UNION ALL
@@ -64,19 +64,19 @@ FROM (
 ) AS q;
 
 -- Create questions for Digestive System Quiz
-INSERT INTO assignment_questions (assignment_id, question_content, choices)
+INSERT INTO quiz_questions (quiz_id, question_content, quiz_answer_choices)
 SELECT
   (
     SELECT id
-    FROM assignments
+    FROM quizzes
     WHERE title = 'Digestive System Overview'
   ),
   q.question_content,
-  q.choices
+  q.quiz_answer_choices
 FROM (
   SELECT
     'Where does chemical digestion begin?' AS question_content,
-    'Mouth;;Stomach;;Small intestine;;Esophagus' AS choices
+    'Mouth;;Stomach;;Small intestine;;Esophagus' AS quiz_answer_choices
   UNION ALL
   SELECT 'Which organ produces bile?', 'Liver;;Pancreas;;Gallbladder;;Stomach'
   UNION ALL
