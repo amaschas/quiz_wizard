@@ -1,0 +1,37 @@
+services:
+  quiz-backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app/
+      - /app/node_modules
+      - /app/dist
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3001:3001"
+    networks:
+      - quiz-network
+    command: "npm run dev"
+
+  quiz-frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - quiz-backend
+    volumes:
+      - ./frontend:/app/
+      - ./biome.json:/app/biome.json
+      - /app/node_modules
+      - /app/dist
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - quiz-network
+    command: "npm run dev"
+
+networks:
+  quiz-network:
+    driver: bridge

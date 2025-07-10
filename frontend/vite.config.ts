@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
 			watch: {
 				ignored: ["**/build/**"],
 			},
+			host: '0.0.0.0',
 			port: +(env.VITE_FRONTEND_SERVER_PORT ?? 3000),
 			strictPort: true,
 		},

@@ -10,11 +10,11 @@ import {
 import { quizPath } from "@/paths";
 import { Link } from "react-router-dom";
 
-function QuizItem({ name, id }: Quiz) {
+function QuizItem({ title, id }: Quiz) {
 	return (
 		<TableRow>
 			<TableCell>{id}</TableCell>
-			<TableCell>{name}</TableCell>
+			<TableCell>{title}</TableCell>
 			<TableCell>
 				<Button asChild>
 					<Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
@@ -26,7 +26,7 @@ function QuizItem({ name, id }: Quiz) {
 
 export type Quiz = {
 	id: number;
-	name: string;
+	title: string;
 };
 
 export function QuizzesList({ quizzes }: { quizzes: Quiz[] }) {
