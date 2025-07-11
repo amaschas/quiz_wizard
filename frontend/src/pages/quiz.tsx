@@ -86,7 +86,7 @@ export const QuizAnswerChoice: React.FC = (props: {choice: AppQuizAnswerChoice, 
 }
 
 export const QuizPage: React.FC = () => {
-  const USER_ID = 1;
+  const USER_ID = "1";
 	const { id } = useParams();
 	if (!id) throw new Error("Quiz id param is required");
 
@@ -196,7 +196,7 @@ export const QuizPage: React.FC = () => {
     // console.log("activeAnswer", activeAnswer)
     // console.log("quiz", quiz)
     // console.log("activeAnswerSet", activeAnswerSet)
-    fetchUser({user_id: USER_ID});
+    // fetchUser({user_id: USER_ID});
   
     // If we have a quiz but not active answer
     // activate the first answer in the quiz
