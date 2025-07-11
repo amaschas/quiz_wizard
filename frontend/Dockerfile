@@ -17,7 +17,7 @@ FROM dependencies AS build
 # Copy the rest of the app code
 COPY . .
 
-RUN npm run build
+# RUN npm run build
 
 FROM build AS release
 

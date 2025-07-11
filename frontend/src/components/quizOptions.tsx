@@ -1,5 +1,3 @@
-import type React from "react";
-
 import {
 	CardContent,
 } from "@/components/ui/card";
@@ -10,16 +8,17 @@ import type {
   ApiUser,
   ApiQuiz,
   ApiActiveAnswer,
-  ApiQuizQuestion
+  AppQuizQuestion,
+  AppQuizAnswerChoice
 } from "@/components/quiz";
 import type { AnswerChangeArgs } from "@/pages/quiz";
 
-export const QuizOptions: React.FC = (props: {
+export const QuizOptions = (props: {
   user: ApiUser,
   quiz: ApiQuiz,
   activeAnswer: ApiActiveAnswer,
-  activeQuestion: ApiQuizQuestion,
-  shuffledChoices: ApiQuizQuestion[],
+  activeQuestion: AppQuizQuestion,
+  shuffledChoices: AppQuizAnswerChoice[],
   handleAnswerChange: (args: AnswerChangeArgs) => void,
 }) => {
   const {

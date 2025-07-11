@@ -5,7 +5,6 @@ build:
 	docker compose build
 
 start:
-	[ -f .env ] || cp .env-example .env && docker compose up
-
-shell:
-	docker compose run --rm app sh
+	[ -f frontend/.env ] || cp frontend/.env.sample frontend/.env && \
+  [ -f backend/.env ] || cp backend/.env.sample backend/.env && \
+  docker compose up

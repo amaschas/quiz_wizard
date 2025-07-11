@@ -63,6 +63,16 @@
   margin: 0 5px 0 0;
 }
 
+.correct {
+  margin: 0 0 0 5px;
+  color: green;
+}
+
+.incorrect {
+  margin: 0 0 0 5px;
+  color: red;
+}
+
 @layer base {
 	* {
 		@apply border-border;

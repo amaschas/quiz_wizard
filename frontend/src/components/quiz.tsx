@@ -23,16 +23,10 @@ export interface ApiQuiz {
   questions?: ApiQuizQuestion[];
 };
 
-enum QuestionType {
-  MultipleChoice = "multiple-choice",
-  TrueFalse = "free-form",
-  }
-
 export interface ApiQuizQuestion {
   id: number;
   quiz_id: number;
   question_content: string;
-  quiz_question_type: QuestionType;
   quiz_answer_choices: string;
 };
 
@@ -42,20 +36,20 @@ export interface ApiActiveAnswer {
   quiz_question_id: number;
   quiz_question_answer_index: number;
   is_active: boolean;
+  sec_on_question: number;
+};
+
+export interface AppQuizQuestion {
+  id: number;
+  quiz_id: number;
+  question_content: string;
+  quiz_answer_choices?: AppQuizAnswerChoice[];
 };
 
 export interface AppQuizAnswerChoice {
   id: number;
   value: string;
 }
-
-export interface AppQuizQuestion {
-  id: number;
-  quiz_id: number;
-  question_content: string;
-  quiz_question_type: QuestionType;
-  quiz_answer_choices?: AppQuizAnswerChoice[];
-};
 
 const QuizItem = ({ title, id }: ApiQuiz) => {
   return (

@@ -8,7 +8,6 @@ interface SubmitAnswerBody {
 	quiz_id: number;
 	question_id: number;
 	question_answer_index?: number;
-	question_type?: string;
 	sec_on_question?: number;
 }
 
@@ -96,8 +95,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 		quiz_id,
 		question_id,
 		question_answer_index,
-		question_type = 'multiple-choice',
-		sec_on_question = 0
+		sec_on_question
 	} = request.body;
   
 	if (!user_id || !quiz_id || !question_id) {
@@ -128,7 +126,10 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
         WHEN :quiz_question_answer_index IS NOT NULL THEN :quiz_question_answer_index
         ELSE quiz_question_answer_index
       END,
-			sec_on_question = :sec_on_question,
+      sec_on_question = CASE
+        WHEN :sec_on_question IS NOT NULL THEN :sec_on_question
+        ELSE sec_on_question
+      END,
 			is_active = 1;
 	`);
 
@@ -151,8 +152,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 		quiz_id: quiz_id,
 		quiz_question_id: question_id,
 		quiz_question_answer_index: question_answer_index,
-		sec_on_question: sec_on_question,
-    question_type: question_type
+		sec_on_question: sec_on_question
 	});
 
   return { status: 'ok' };

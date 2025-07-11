@@ -14,6 +14,14 @@
 In order to use the boilerplate you will need the following:
 - Node.js 20+
 
+## Updated Setup
+
+While the original approach will still work, the repository has been Dockerized for ease of use. The only command necessary to start the application is:
+
+```
+make start
+```
+
 ## Setup
 1. Pull the repo
   ```bash

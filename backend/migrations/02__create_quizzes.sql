@@ -10,10 +10,6 @@ CREATE TABLE
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     quiz_id INTEGER NOT NULL REFERENCES quizzes (id),
     question_content TEXT,
-    quiz_question_type TEXT DEFAULT 'multiple-choice' CHECK (quiz_question_type IN (
-      'multiple-choice',
-      'free-form'
-    )),
     quiz_answer_choices TEXT, -- sqlite doesn't support arrays, so we'll store choices as a string of ';;'-separated values
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
