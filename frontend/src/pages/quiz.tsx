@@ -39,7 +39,7 @@ export interface AnswerChangeArgs {
   quiz_id: number;
   question_id: number;
   question_answer_index?: number;
-  ms_on_question?: number;
+  sec_on_question?: number;
 }
 
 export const QuizAnswerChoice: React.FC = (props: {selected: boolean}) => {
@@ -67,11 +67,11 @@ export const QuizPage: React.FC = () => {
 	const [user, setUser] = useState<ApiUser | null>(null);
   const [quiz, setQuiz] = useState<ApiQuiz | null>(null);
 	const [activeAnswer, setActiveAnswer] = useState<ApiActiveAnswer | null>(null);
-  // const [activeQuestion, setActiveQuestion] = useState<ApiQuizQuestion | null>(null);
+  const [activeQuestion, setActiveQuestion] = useState<ApiQuizQuestion | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<ApiActiveAnswer[] | []>([]);
   const [shuffledChoices, setShuffledChoices] = useState<AppQuizAnswerChoice[]>([]);
   const [doShuffle, setdoShuffle] = useState<boolean>(true);
-  // const [quizProgress, setQuizProgress] = useState<boolean>({current: 0, total: 0});
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
 	const [error, setError] = useState<Error | null>(null);
 
   const activeAnswerSet = activeAnswer === null || Object.keys(activeAnswer).length !== 0;
@@ -199,7 +199,7 @@ export const QuizPage: React.FC = () => {
     // question from the array of quiz questions and shuffle the choices.
     if (quiz && activeAnswer && Object.keys(activeAnswer).length) {
       const question = getAnswerData(activeAnswer, quiz.questions);
-      // setActiveQuestion(question);
+      setActiveQuestion(question);
       if (doShuffle && question?.quiz_answer_choices) {
         const shuffled = shuffleArray(question?.quiz_answer_choices);
         setShuffledChoices(shuffled);
@@ -207,6 +207,33 @@ export const QuizPage: React.FC = () => {
       }
     }
   }, [quiz, activeAnswer]);
+
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setSecondsElapsed((prev: number) => prev + 5);
+  //   }, 5000);
+
+  //   return () => clearInterval(intervalId);
+  // }, []); // only set up once
+
+  // useEffect(() => {
+  //   if (activeAnswer) {
+  //     handleAnswerChange({
+  //       user_id: USER_ID,
+  //       quiz_id: id,
+  //       question_id: quiz.questions[0].id,
+  //       sec_on_question: secondsElapsed
+  //     });
+  //   }
+  // }, [secondsElapsed]);
+
+  // useEffect(() => {
+  //   if (activeAnswer && quiz && activeQuestion && activeAnswer.quiz_question_id !== activeQuestion?.id) {
+  //     setSecondsElapsed(0);
+  //   }
+  // }, [activeAnswer]);
+
+  // console.log(secondsElapsed)
 
 	if (error)
 		return (
@@ -216,13 +243,11 @@ export const QuizPage: React.FC = () => {
 			</div>
 		);
 
-	if (!quiz || !activeAnswer) return <div className="text-center p-8">Loading...</div>;
+	if (!quiz || !activeAnswer || !activeQuestion) return <div className="text-center p-8">Loading...</div>;
 
   if (checkQuizComplete(user, id)) return <QuizResults quiz={quiz} answers={quizAnswers} />
 
   const quizProgress = getQuizProgress(quiz, activeAnswer);
-  const activeQuestion = getAnswerData(activeAnswer, quiz.questions);
-  console.log((quizProgress?.current + 1) / quizProgress?.total)
 
 	return (
 		<Card className="w-[600px] mx-auto">
@@ -247,7 +272,7 @@ export const QuizPage: React.FC = () => {
         handleAnswerChange={handleAnswerChange}
       />
       <CardContent>
-        <Progress value={(quizProgress?.current + 1) / quizProgress?.total * 100} />
+        <Progress value={quizProgress?.current / quizProgress?.total * 100} />
         <CardDescription>Question #{quizProgress?.current + 1} of {quizProgress?.total}</CardDescription>
       </CardContent>
 			<CardFooter className="flex justify-between pt-8">

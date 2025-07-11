@@ -25,7 +25,7 @@ CREATE TABLE
     quiz_question_id INTEGER NOT NULL REFERENCES quiz_questions (id),
     quiz_question_answer_index INTEGER DEFAULT NULL,
     is_active BOOLEAN NOT NULL DEFAULT 0 CHECK (is_active IN (0, 1)),
-    ms_on_question INTEGER DEFAULT 0,
+    sec_on_question INTEGER DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, quiz_id, quiz_question_id)
   );

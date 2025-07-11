@@ -9,7 +9,7 @@ interface SubmitAnswerBody {
 	question_id: number;
 	question_answer_index?: number;
 	question_type?: string;
-	ms_on_question?: number;
+	sec_on_question?: number;
 }
 
 interface QuizAnswerRow {
@@ -18,7 +18,7 @@ interface QuizAnswerRow {
   quiz_question_id: number;
   quiz_question_answer_index: number;
   is_active: number; // stored as 0 or 1 in SQLite
-  ms_on_question: number;
+  sec_on_question: number;
 };
 
 interface User {
@@ -97,7 +97,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 		question_id,
 		question_answer_index,
 		question_type = 'multiple-choice',
-		ms_on_question = 0
+		sec_on_question = 0
 	} = request.body;
   
 	if (!user_id || !quiz_id || !question_id) {
@@ -112,7 +112,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 			quiz_question_id,
 			quiz_question_answer_index,
 			is_active,
-			ms_on_question
+			sec_on_question
 		)
 		VALUES (
 			:user_id,
@@ -120,7 +120,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 			:quiz_question_id,
 			:quiz_question_answer_index,
 			1,
-			:ms_on_question
+			:sec_on_question
 		)
 		ON CONFLICT(user_id, quiz_id, quiz_question_id)
 		DO UPDATE SET
@@ -128,7 +128,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
         WHEN :quiz_question_answer_index IS NOT NULL THEN :quiz_question_answer_index
         ELSE quiz_question_answer_index
       END,
-			ms_on_question = :ms_on_question,
+			sec_on_question = :sec_on_question,
 			is_active = 1;
 	`);
 
@@ -151,7 +151,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
 		quiz_id: quiz_id,
 		quiz_question_id: question_id,
 		quiz_question_answer_index: question_answer_index,
-		ms_on_question: ms_on_question,
+		sec_on_question: sec_on_question,
     question_type: question_type
 	});
 
