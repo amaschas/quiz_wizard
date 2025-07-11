@@ -13,7 +13,7 @@ const apiUrlFactory = <T extends string>(pattern: T) => {
 };
 
 // API GET URLs
-export const quizApiUrl = apiUrlFactory("/quizzes/:id");
+export const quizApiUrl = apiUrlFactory("/quiz/:quiz_id");
 export const quizzesApiUrl = apiUrlFactory("/quizzes");
 export const quizAnswersApiUrl = apiUrlFactory("/quizzes/answers/:user_id/:quiz_id");
 export const quizActiveAnswerApiUrl = apiUrlFactory("/quizzes/active-answer/:user_id/:quiz_id");

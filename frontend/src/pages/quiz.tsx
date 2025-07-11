@@ -102,7 +102,7 @@ export const QuizPage: React.FC = () => {
   const activeAnswerSet = activeAnswer === null || Object.keys(activeAnswer).length !== 0;
 
   const fetchQuiz = async () => {
-    const res = await fetch(quizApiUrl({ id }), {
+    const res = await fetch(quizApiUrl({ quiz_id: id }), {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })

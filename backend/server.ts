@@ -52,10 +52,10 @@ server.get("/quizzes", (_request, reply) => {
 	return data;
 });
 
-server.get("/quizzes/:id", (request, reply) => {
-	const quiz_data_query = db.prepare("SELECT * FROM quizzes WHERE id = :id");
+server.get("/quiz/:quiz_id", (request, reply) => {
+	const quiz_data_query = db.prepare("SELECT * FROM quizzes WHERE id = :quiz_id");
 	const quiz_data = quiz_data_query.get(request.params) || {};
-	const question_data_query = db.prepare("SELECT * FROM quiz_questions WHERE quiz_id = :id");
+	const question_data_query = db.prepare("SELECT * FROM quiz_questions WHERE quiz_id = :quiz_id");
 	const question_data = question_data_query.all(request.params) || {};
 
 	return {
