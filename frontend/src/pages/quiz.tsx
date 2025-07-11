@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import type {
@@ -33,8 +33,8 @@ import {
 import { QuizResults } from "@/components/quizResults";
 
 export interface AnswerChangeArgs {
-  user_id: number;
-  quiz_id: number;
+  user_id: string;
+  quiz_id: string;
   question_id: number;
   question_answer_index?: number;
   ms_on_question?: number;
@@ -54,18 +54,34 @@ export const getAnswerData = (activeAnswer: ApiActiveAnswer, quizQuestions: ApiQ
   };
 }
 
-export const checkQuizComplete = (user: ApiUser, quizId: number): boolean => {
-  return user?.quizzes_completed.split(";;").findIndex((id: string) => Number(id) === quizId) >= 0;
+export const checkQuizComplete = (user: ApiUser, quizId: string): boolean => {
+  if (!user?.quizzes_completed) return false;
+
+  const quizComplete = user?.quizzes_completed.split(";;").findIndex((id: string) => {
+    return id === quizId
+  }) >= 0;
+  return quizComplete;
 }
 
-export const getNextQuestionId = (currentId: number, questions: AppQuizQuestion[]) => {
+export const getAdjacentQuestionId = (
+  currentId: number,
+  questions: AppQuizQuestion[],
+  direction: "next" | "prev"
+): number => {
   const currentIndex = questions.findIndex(question => question.id === currentId);
-  try {
-    return questions[currentIndex + 1].id
-  } catch {
-    return -1
+
+  if (currentIndex === -1) return -1;
+
+  if (direction === "next") {
+    return questions[currentIndex + 1]?.id ?? -1;
   }
-}
+
+  if (direction === "prev") {
+    return currentIndex === 0 ? currentId : questions[currentIndex - 1].id;
+  }
+
+  return -1;
+};
 
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array]; // copy to avoid mutating original
@@ -122,6 +138,7 @@ export const QuizPage: React.FC = () => {
 		if (!res.ok) throw new Error("Failed to fetch active answer");
 
 		const activeAnswerData = await res.json();
+    console.log("activeAnswerData", activeAnswerData)
     setActiveAnswer(activeAnswerData)
   }
 
@@ -156,8 +173,8 @@ export const QuizPage: React.FC = () => {
     }
   };
 
-  const fetchUser = async (args: { user_id: number }) => {
-    const res = await fetch(userApiUrl(args), {
+  const fetchUser = async () => {
+    const res = await fetch(userApiUrl({ user_id: USER_ID }), {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
@@ -168,9 +185,9 @@ export const QuizPage: React.FC = () => {
     setUser(userData)
   }
 
-  const setQuizComplete = async (args: {user_id: number, quiz_id: number}) => {
+  const setQuizComplete = async (args: {user_id: string, quiz_id: string}) => {
     try {
-      const res = await fetch(userSetQuizCompleteApiUrl(args), {
+      const res = await fetch(userSetQuizCompleteApiUrl({}), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -192,11 +209,12 @@ export const QuizPage: React.FC = () => {
 		fetchActiveAnswer();
 	}, [id]);
 
+  	useEffect(() => {
+		fetchQuizAnswers();
+	}, [user]);
+
   useEffect(() => {
-    // console.log("activeAnswer", activeAnswer)
-    // console.log("quiz", quiz)
-    // console.log("activeAnswerSet", activeAnswerSet)
-    // fetchUser({user_id: USER_ID});
+    fetchUser();
   
     // If we have a quiz but not active answer
     // activate the first answer in the quiz
@@ -241,11 +259,10 @@ export const QuizPage: React.FC = () => {
       <CardContent><CardDescription>Quiz Question #</CardDescription></CardContent>
       <CardContent>
         {activeQuestion.question_content}
-        <ul>
+        <ul className="quiz-choices">
           { shuffledChoices.map((choice => (
-            <>
+            <li key={`choice-${choice?.id}`}>
               <Checkbox
-                key={`choice-${choice?.id}`}
                 checked={choice.id === activeAnswer.quiz_question_answer_index}
                 onCheckedChange={() => handleAnswerChange({
                   user_id: USER_ID,
@@ -255,7 +272,7 @@ export const QuizPage: React.FC = () => {
                 })}
               />
               <Label>{ choice.value }</Label>
-            </>
+            </li>
           ))) }
         </ul>
       </CardContent>
@@ -263,12 +280,10 @@ export const QuizPage: React.FC = () => {
         <Button
           disabled={activeAnswer.quiz_question_answer_index === null}
           onClick={() =>{
-            const nextQuestionId = getNextQuestionId(activeAnswer.quiz_question_id, quiz.questions)
-
+            const nextQuestionId = getAdjacentQuestionId(activeAnswer.quiz_question_id, quiz.questions, "next")
             if (nextQuestionId < 0) {
-              fetchQuizAnswers();
               setQuizComplete({user_id: USER_ID, quiz_id: id});
-              fetchUser({user_id: USER_ID});
+              fetchUser();
             } else {
               setdoShuffle(true)
               handleAnswerChange({

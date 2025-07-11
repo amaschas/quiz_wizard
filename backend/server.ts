@@ -68,11 +68,9 @@ server.get("/quizzes/answers/:user_id/:quiz_id", (request, reply) => {
 	const query = db.prepare(
 		"SELECT * FROM quiz_answers WHERE user_id = :user_id AND quiz_id = :quiz_id"
 	);
-	const quiz_data = query.all(request.params) || {};
+	const quiz_data = query.all(request.params) || [];
 
-	return {
-		...quiz_data
-	}
+	return quiz_data
 });
 
 server.get("/quizzes/active-answer/:user_id/:quiz_id", (request, reply) => {
@@ -160,7 +158,7 @@ server.post('/quizzes/submit-answer', async (request: FastifyRequest<{ Body: Sub
   return { status: 'ok' };
 });
 
-server.post('/users/complete-quiz', async (request: FastifyRequest<{ Body: { user_id: number, quiz_id: number } }>, reply) => {
+server.post('/user/complete-quiz', async (request: FastifyRequest<{ Body: { user_id: number, quiz_id: number } }>, reply) => {
     const { user_id, quiz_id } = request.body;
     // Fetch current quizzes_completed
     const getUser = db.prepare("SELECT quizzes_completed FROM users WHERE id = ?");

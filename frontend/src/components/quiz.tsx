@@ -10,20 +10,6 @@ import {
 import { quizPath } from "@/paths";
 import { Link } from "react-router-dom";
 
-function QuizItem({ title, id }: ApiQuiz) {
-  return (
-    <TableRow key={`quiz-${id}`}>
-      <TableCell>{id}</TableCell>
-      <TableCell>{title}</TableCell>
-      <TableCell>
-        <Button asChild>
-          <Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-}
-
 export interface ApiUser {
     id: number;
     name: string;
@@ -71,7 +57,21 @@ export interface AppQuizQuestion {
   quiz_answer_choices?: AppQuizAnswerChoice[];
 };
 
-export function QuizzesList({ quizzes }: { quizzes: ApiQuiz[] }) {
+const QuizItem = ({ title, id }: ApiQuiz) => {
+  return (
+    <TableRow key={`quiz-${id}`}>
+      <TableCell>{id}</TableCell>
+      <TableCell>{title}</TableCell>
+      <TableCell>
+        <Button asChild>
+          <Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+export const QuizzesList = ({ quizzes }: { quizzes: ApiQuiz[] }) => {
   return (
     <Table>
       <TableHeader>
