@@ -1,45 +1,87 @@
 import { Button } from "@/components/ui/button";
 import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { quizPath } from "@/paths";
 import { Link } from "react-router-dom";
 
-function QuizItem({ title, id }: Quiz) {
-	return (
-		<TableRow>
-			<TableCell>{id}</TableCell>
-			<TableCell>{title}</TableCell>
-			<TableCell>
-				<Button asChild>
-					<Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
-				</Button>
-			</TableCell>
-		</TableRow>
-	);
+function QuizItem({ title, id }: ApiQuiz) {
+  return (
+    <TableRow key={`quiz-${id}`}>
+      <TableCell>{id}</TableCell>
+      <TableCell>{title}</TableCell>
+      <TableCell>
+        <Button asChild>
+          <Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
 }
 
-export type Quiz = {
-	id: number;
-	title: string;
+export interface ApiUser {
+    id: number;
+    name: string;
+    email: string;
+    quizzes_completed: string;
 };
 
-export function QuizzesList({ quizzes }: { quizzes: Quiz[] }) {
-	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>ID</TableHead>
-					<TableHead>Name</TableHead>
-					<TableHead>Actions</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>{quizzes.map((quiz) => QuizItem(quiz))}</TableBody>
-		</Table>
-	);
+export interface ApiQuiz {
+  id: number;
+  title: string;
+  questions?: ApiQuizQuestion[];
+};
+
+enum QuestionType {
+  MultipleChoice = "multiple-choice",
+  TrueFalse = "free-form",
+  }
+
+export interface ApiQuizQuestion {
+  id: number;
+  quiz_id: number;
+  question_content: string;
+  quiz_question_type: QuestionType;
+  quiz_answer_choices: string;
+};
+
+export interface ApiActiveAnswer {
+  user_id: number;
+  quiz_id: number;
+  quiz_question_id: number;
+  quiz_question_answer_index: number;
+  is_active: boolean;
+};
+
+export interface AppQuizAnswerChoice {
+  id: number;
+  value: string;
+}
+
+export interface AppQuizQuestion {
+  id: number;
+  quiz_id: number;
+  question_content: string;
+  quiz_question_type: QuestionType;
+  quiz_answer_choices?: AppQuizAnswerChoice[];
+};
+
+export function QuizzesList({ quizzes }: { quizzes: ApiQuiz[] }) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>ID</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>{quizzes.map((quiz) => QuizItem(quiz))}</TableBody>
+    </Table>
+  );
 }

@@ -35,8 +35,8 @@ FROM (
   SELECT 'Which part of the skull protects the brain?', 'Cranium;;Mandible;;Maxilla;;Hyoid'
   UNION ALL
   SELECT 'What is the common name for the clavicle?', 'Collarbone;;Wishbone;;Shoulderblade;;Neckbone'
-  UNION ALL
-  SELECT 'Explain the difference between compact and spongy bone tissue:', NULL
+  -- UNION ALL
+  -- SELECT 'Explain the difference between compact and spongy bone tissue:', NULL
 ) AS q;
 
 -- Create questions for Cardiovascular Quiz
@@ -59,8 +59,8 @@ FROM (
   SELECT 'Which blood vessel carries oxygenated blood?', 'Arteries;;Veins;;Capillaries;;Venules'
   UNION ALL
   SELECT 'How many chambers are in the human heart?', '4;;2;;3;;6'
-  UNION ALL
-  SELECT 'Describe the path of blood flow through the heart:', NULL
+  -- UNION ALL
+  -- SELECT 'Describe the path of blood flow through the heart:', NULL
 ) AS q;
 
 -- Create questions for Digestive System Quiz
@@ -83,7 +83,7 @@ FROM (
   SELECT 'What is the longest part of the digestive system?', 'Small intestine;;Large intestine;;Esophagus;;Stomach'
   UNION ALL
   SELECT 'Which enzyme breaks down proteins in the stomach?', 'Pepsin;;Amylase;;Lipase;;Trypsin'
-  UNION ALL
-  SELECT 'Explain the role of villi in the small intestine:', NULL
+  -- UNION ALL
+  -- SELECT 'Explain the role of villi in the small intestine:', NULL
 ) AS q;
   
