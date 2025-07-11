@@ -17,9 +17,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   quizApiUrl,
   quizActiveAnswerApiUrl,
@@ -30,7 +28,9 @@ import {
   rootPath
 } from "@/paths";
 import { QuizResults } from "@/components/quizResults";
-import { getAnswerData, checkQuizComplete, getAdjacentQuestionId, shuffleArray} from "@/lib/utils";
+import { QuizNavigation } from "@/components/quizNavigation"
+import { QuizOptions } from "@/components/quizOptions"
+import { getAnswerData, checkQuizComplete, shuffleArray} from "@/lib/utils";
 
 const USER_ID = 1;
 
@@ -42,13 +42,22 @@ export interface AnswerChangeArgs {
   ms_on_question?: number;
 }
 
-export const QuizAnswerChoice: React.FC = (props: {choice: AppQuizAnswerChoice, selected: boolean}) => {
-  const { choice, selected } = props;
+export const QuizAnswerChoice: React.FC = (props: {selected: boolean}) => {
+  const { selected } = props;
   return (
     <li>
       <Checkbox checked={selected} />
     </li>
   )
+}
+
+const getQuizProgress = (quiz: ApiQuiz, activeAnswer: ApiActiveAnswer): { current: number, total: number } => {
+  const current = quiz?.questions.findIndex(question => question.id === activeAnswer.quiz_question_id);
+
+  return {
+    current,
+    total: quiz?.questions?.length || 0
+  }
 }
 
 export const QuizPage: React.FC = () => {
@@ -57,11 +66,12 @@ export const QuizPage: React.FC = () => {
 
 	const [user, setUser] = useState<ApiUser | null>(null);
   const [quiz, setQuiz] = useState<ApiQuiz | null>(null);
-	const [activeAnswer, setActiveAnswer] = useState<ApiActiveAnswer | {} | null>(null);
-  const [activeQuestion, setActiveQuestion] = useState<ApiQuizQuestion | null>(null);
+	const [activeAnswer, setActiveAnswer] = useState<ApiActiveAnswer | null>(null);
+  // const [activeQuestion, setActiveQuestion] = useState<ApiQuizQuestion | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<ApiActiveAnswer[] | []>([]);
   const [shuffledChoices, setShuffledChoices] = useState<AppQuizAnswerChoice[]>([]);
   const [doShuffle, setdoShuffle] = useState<boolean>(true);
+  // const [quizProgress, setQuizProgress] = useState<boolean>({current: 0, total: 0});
 	const [error, setError] = useState<Error | null>(null);
 
   const activeAnswerSet = activeAnswer === null || Object.keys(activeAnswer).length !== 0;
@@ -189,8 +199,8 @@ export const QuizPage: React.FC = () => {
     // question from the array of quiz questions and shuffle the choices.
     if (quiz && activeAnswer && Object.keys(activeAnswer).length) {
       const question = getAnswerData(activeAnswer, quiz.questions);
-      setActiveQuestion(question);
-      if (doShuffle) {
+      // setActiveQuestion(question);
+      if (doShuffle && question?.quiz_answer_choices) {
         const shuffled = shuffleArray(question?.quiz_answer_choices);
         setShuffledChoices(shuffled);
         setdoShuffle(false);
@@ -206,69 +216,39 @@ export const QuizPage: React.FC = () => {
 			</div>
 		);
 
-	if (!quiz || !activeAnswer || !activeQuestion) return <div className="text-center p-8">Loading...</div>;
+	if (!quiz || !activeAnswer) return <div className="text-center p-8">Loading...</div>;
 
   if (checkQuizComplete(user, id)) return <QuizResults quiz={quiz} answers={quizAnswers} />
+
+  const quizProgress = getQuizProgress(quiz, activeAnswer);
+  const activeQuestion = getAnswerData(activeAnswer, quiz.questions);
+  console.log((quizProgress?.current + 1) / quizProgress?.total)
 
 	return (
 		<Card className="w-[600px] mx-auto">
 			<CardHeader className="pb-8">
 				<CardTitle>Quiz #{quiz.id}: {quiz.title}</CardTitle>
 			</CardHeader>
-      <CardContent><CardDescription>Quiz Question #</CardDescription></CardContent>
+      <QuizOptions
+        user={user}
+        quiz={quiz}
+        activeAnswer={activeAnswer}
+        activeQuestion={activeQuestion}
+        shuffledChoices={shuffledChoices}
+        handleAnswerChange={handleAnswerChange}
+      />
+      <QuizNavigation
+        user={user}
+        quiz={quiz}
+        activeAnswer={activeAnswer}
+        setQuizComplete={setQuizComplete}
+        fetchUser={fetchUser}
+        setdoShuffle={setdoShuffle}
+        handleAnswerChange={handleAnswerChange}
+      />
       <CardContent>
-        {activeQuestion.question_content}
-        <ul className="quiz-choices">
-          { shuffledChoices.map((choice => (
-            <li key={`choice-${choice?.id}`}>
-              <Checkbox
-                checked={choice.id === activeAnswer.quiz_question_answer_index}
-                onCheckedChange={() => handleAnswerChange({
-                  user_id: USER_ID,
-                  quiz_id: id,
-                  question_id: activeQuestion.id,
-                  question_answer_index: choice.id
-                })}
-              />
-              <Label>{ choice.value }</Label>
-            </li>
-          ))) }
-        </ul>
-      </CardContent>
-      <CardContent>
-        <Button
-          disabled={activeAnswer.quiz_question_answer_index === null}
-          onClick={() =>{
-            const nextQuestionId = getAdjacentQuestionId(activeAnswer.quiz_question_id, quiz.questions, "next")
-            if (nextQuestionId < 0) {
-              setQuizComplete({user_id: USER_ID, quiz_id: id});
-              fetchUser();
-            } else {
-              setdoShuffle(true)
-              handleAnswerChange({
-                user_id: USER_ID,
-                quiz_id: id,
-                question_id: nextQuestionId
-              });
-            }
-          }}>
-          Submit
-        </Button>
-        <Button
-          disabled={activeAnswer.quiz_question_id === quiz.questions[0].id}
-          onClick={() =>{
-            const prevQuestionId = getAdjacentQuestionId(activeAnswer.quiz_question_id, quiz.questions, "prev")
-            if (activeAnswer.quiz_question_id > 0) {
-              setdoShuffle(true)
-              handleAnswerChange({
-                user_id: USER_ID,
-                quiz_id: id,
-                question_id: prevQuestionId
-              });
-            }
-          }}>
-          Back
-        </Button>
+        <Progress value={(quizProgress?.current + 1) / quizProgress?.total * 100} />
+        <CardDescription>Question #{quizProgress?.current + 1} of {quizProgress?.total}</CardDescription>
       </CardContent>
 			<CardFooter className="flex justify-between pt-8">
 				<Link
