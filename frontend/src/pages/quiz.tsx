@@ -7,7 +7,6 @@ import type {
   ApiQuiz,
   ApiQuizQuestion,
   ApiActiveAnswer,
-  AppQuizQuestion,
   AppQuizAnswerChoice
 } from "@/components/quiz";
 import {
@@ -31,65 +30,16 @@ import {
   rootPath
 } from "@/paths";
 import { QuizResults } from "@/components/quizResults";
+import { getAnswerData, checkQuizComplete, getAdjacentQuestionId, shuffleArray} from "@/lib/utils";
+
+const USER_ID = 1;
 
 export interface AnswerChangeArgs {
-  user_id: string;
-  quiz_id: string;
+  user_id: number;
+  quiz_id: number;
   question_id: number;
   question_answer_index?: number;
   ms_on_question?: number;
-}
-
-export const getAnswerData = (activeAnswer: ApiActiveAnswer, quizQuestions: ApiQuizQuestion[]): AppQuizQuestion => {
-  const { quiz_question_id } = activeAnswer;
-  const activeQuestion = quizQuestions.find(question => question.id === quiz_question_id);
-  const formattedAnswerChoices = activeQuestion?.quiz_answer_choices.split(";;").map((choice, index) => ({
-    id: index,
-    value: choice,
-  }));
-
-  return {
-    ...activeQuestion,
-    quiz_answer_choices: formattedAnswerChoices
-  };
-}
-
-export const checkQuizComplete = (user: ApiUser, quizId: string): boolean => {
-  if (!user?.quizzes_completed) return false;
-
-  const quizComplete = user?.quizzes_completed.split(";;").findIndex((id: string) => {
-    return id === quizId
-  }) >= 0;
-  return quizComplete;
-}
-
-export const getAdjacentQuestionId = (
-  currentId: number,
-  questions: AppQuizQuestion[],
-  direction: "next" | "prev"
-): number => {
-  const currentIndex = questions.findIndex(question => question.id === currentId);
-
-  if (currentIndex === -1) return -1;
-
-  if (direction === "next") {
-    return questions[currentIndex + 1]?.id ?? -1;
-  }
-
-  if (direction === "prev") {
-    return currentIndex === 0 ? currentId : questions[currentIndex - 1].id;
-  }
-
-  return -1;
-};
-
-function shuffleArray<T>(array: T[]): T[] {
-  const arr = [...array]; // copy to avoid mutating original
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
 }
 
 export const QuizAnswerChoice: React.FC = (props: {choice: AppQuizAnswerChoice, selected: boolean}) => {
@@ -102,7 +52,6 @@ export const QuizAnswerChoice: React.FC = (props: {choice: AppQuizAnswerChoice, 
 }
 
 export const QuizPage: React.FC = () => {
-  const USER_ID = "1";
 	const { id } = useParams();
 	if (!id) throw new Error("Quiz id param is required");
 
@@ -117,6 +66,7 @@ export const QuizPage: React.FC = () => {
 
   const activeAnswerSet = activeAnswer === null || Object.keys(activeAnswer).length !== 0;
 
+  // Fetch the quiz data and set the state value
   const fetchQuiz = async () => {
     const res = await fetch(quizApiUrl({ quiz_id: id }), {
       method: "GET",
@@ -129,6 +79,7 @@ export const QuizPage: React.FC = () => {
     setQuiz(quiz)
   }
 
+  // Fetch the user's active answer to the current quiz and set the state value
   const fetchActiveAnswer = async () => {
     const res = await fetch(quizActiveAnswerApiUrl({ user_id: USER_ID, quiz_id: id, }), {
       method: "GET",
@@ -138,10 +89,10 @@ export const QuizPage: React.FC = () => {
 		if (!res.ok) throw new Error("Failed to fetch active answer");
 
 		const activeAnswerData = await res.json();
-    console.log("activeAnswerData", activeAnswerData)
     setActiveAnswer(activeAnswerData)
   }
 
+  // Fetch all of the user's answers to the current quiz and set the state value
   const fetchQuizAnswers = async () => {
     const res = await fetch(quizAnswersApiUrl({ user_id: USER_ID, quiz_id: id, }), {
       method: "GET",
@@ -154,6 +105,7 @@ export const QuizPage: React.FC = () => {
     setQuizAnswers(quizAnswersData)
   }
 
+  // Update an activeAnswer record, the fetch the updated record
   const handleAnswerChange = async (args: AnswerChangeArgs) => {
     try {
       const res = await fetch(quizSubmitAnswerApiUrl({}), {
@@ -173,6 +125,7 @@ export const QuizPage: React.FC = () => {
     }
   };
 
+  // Fetch the user record and update the state value
   const fetchUser = async () => {
     const res = await fetch(userApiUrl({ user_id: USER_ID }), {
       method: "GET",
@@ -185,7 +138,8 @@ export const QuizPage: React.FC = () => {
     setUser(userData)
   }
 
-  const setQuizComplete = async (args: {user_id: string, quiz_id: string}) => {
+  // Update the user record to indicate the user has completed the quiz
+  const setQuizComplete = async (args: {user_id: number, quiz_id: string}) => {
     try {
       const res = await fetch(userSetQuizCompleteApiUrl({}), {
         method: "POST",
@@ -204,12 +158,17 @@ export const QuizPage: React.FC = () => {
     }
   };
 
+  // Fetch the quiz and active answer
 	useEffect(() => {
 		fetchQuiz();
 		fetchActiveAnswer();
 	}, [id]);
 
-  	useEffect(() => {
+  // When the user is updated, fetch the user's quiz answers
+  // This ensures that the quiz results page gets the updated
+  // set of the user's answers when the user record is updated
+  // to set the quiz to complete for that user.
+  useEffect(() => {
 		fetchQuizAnswers();
 	}, [user]);
 
@@ -226,6 +185,8 @@ export const QuizPage: React.FC = () => {
       })
     }
 
+    // If we have all of the necessary resources, grab the active
+    // question from the array of quiz questions and shuffle the choices.
     if (quiz && activeAnswer && Object.keys(activeAnswer).length) {
       const question = getAnswerData(activeAnswer, quiz.questions);
       setActiveQuestion(question);
@@ -246,8 +207,6 @@ export const QuizPage: React.FC = () => {
 		);
 
 	if (!quiz || !activeAnswer || !activeQuestion) return <div className="text-center p-8">Loading...</div>;
-
-  console.log("quizAnswers", quizAnswers)
 
   if (checkQuizComplete(user, id)) return <QuizResults quiz={quiz} answers={quizAnswers} />
 
@@ -295,7 +254,19 @@ export const QuizPage: React.FC = () => {
           }}>
           Submit
         </Button>
-        <Button disabled={activeAnswer.quiz_question_id === quiz.questions[0].id} >
+        <Button
+          disabled={activeAnswer.quiz_question_id === quiz.questions[0].id}
+          onClick={() =>{
+            const prevQuestionId = getAdjacentQuestionId(activeAnswer.quiz_question_id, quiz.questions, "prev")
+            if (activeAnswer.quiz_question_id > 0) {
+              setdoShuffle(true)
+              handleAnswerChange({
+                user_id: USER_ID,
+                quiz_id: id,
+                question_id: prevQuestionId
+              });
+            }
+          }}>
           Back
         </Button>
       </CardContent>

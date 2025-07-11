@@ -5,7 +5,12 @@ export const SERVER_ORIGIN = `http://${SERVER_HOST}`;
 
 const apiUrlFactory = <T extends string>(pattern: T) => {
   const builder = pathFactory(pattern);
-  return (params: Params<T>) => SERVER_ORIGIN + builder(params);
+  return (params: Params<T>) => {
+    const stringParams = Object.fromEntries(
+      Object.entries(params).map(([key, value]) => [key, String(value)])
+    ) as Params<T>;
+    return SERVER_ORIGIN + builder(stringParams);
+  };
 };
 
 // API GET URLs
