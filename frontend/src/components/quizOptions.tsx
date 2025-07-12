@@ -1,9 +1,3 @@
-import {
-	CardContent,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-
 import type {
   ApiUser,
   ApiQuiz,
@@ -12,6 +6,12 @@ import type {
   AppQuizAnswerChoice
 } from "@/components/quiz";
 import type { AnswerChangeArgs } from "@/pages/quiz";
+
+import {
+	CardContent,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export const QuizOptions = (props: {
   user: ApiUser,

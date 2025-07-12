@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -7,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { quizPath } from "@/paths";
-import { Link } from "react-router-dom";
+import { quizPath, userApiUrl } from "@/paths";
+import { checkQuizComplete } from "@/lib/utils";
 
 export interface ApiUser {
     id: number;
@@ -20,7 +23,7 @@ export interface ApiUser {
 export interface ApiQuiz {
   id: number;
   title: string;
-  questions?: ApiQuizQuestion[];
+  questions: ApiQuizQuestion[];
 };
 
 export interface ApiQuizQuestion {
@@ -51,14 +54,18 @@ export interface AppQuizAnswerChoice {
   value: string;
 }
 
-const QuizItem = ({ title, id }: ApiQuiz) => {
+const USER_ID = 1;
+
+const QuizItem = ({ title, id }: ApiQuiz, user: ApiUser) => {
+  const quizComplete = checkQuizComplete(user, `${id}`);
+
   return (
     <TableRow key={`quiz-${id}`}>
       <TableCell>{id}</TableCell>
       <TableCell>{title}</TableCell>
       <TableCell>
         <Button asChild>
-          <Link to={quizPath({ id: id.toString() })}>Take quiz</Link>
+          <Link to={quizPath({ id: id.toString() })}>{ quizComplete ? "View Results" : "Take Quiz" }</Link>
         </Button>
       </TableCell>
     </TableRow>
@@ -66,6 +73,25 @@ const QuizItem = ({ title, id }: ApiQuiz) => {
 }
 
 export const QuizzesList = ({ quizzes }: { quizzes: ApiQuiz[] }) => {
+  const [user, setUser] = useState<ApiUser | null>(null);
+
+  // Fetch the user record and update the state value
+  const fetchUser = async () => {
+    const res = await fetch(userApiUrl({ user_id: USER_ID }), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    })
+
+    if (!res.ok) throw new Error("Failed to fetch quiz answers");
+
+    const userData = await res.json();
+    setUser(userData)
+  }
+
+  useEffect(() => {
+		fetchUser();
+	}, []);
+
   return (
     <Table>
       <TableHeader>
@@ -75,7 +101,7 @@ export const QuizzesList = ({ quizzes }: { quizzes: ApiQuiz[] }) => {
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>{quizzes.map((quiz) => QuizItem(quiz))}</TableBody>
+      <TableBody>{quizzes.map((quiz) => QuizItem(quiz, user))}</TableBody>
     </Table>
   );
 }

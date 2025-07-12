@@ -1,18 +1,18 @@
-import type React from "react";
+import { Link } from "react-router-dom";
 
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
+  CardFooter,
 	CardTitle,
 } from "@/components/ui/card";
-
 import type {
   ApiQuiz,
   ApiActiveAnswer
 } from "@/components/quiz";
-
+import { rootPath } from "@/paths";
 import { getAnswerData } from "@/lib/utils";
 
 const getQuizQuestionAnswer = (questionId: number, answers: ApiActiveAnswer[]) => {
@@ -45,19 +45,19 @@ const getTotalTimeSpent = (answers: ApiActiveAnswer[]) => {
   return formatTime(totalSeconds);
 };
 
-const Correct: React.FC = () => (
+const Correct = () => (
   <span className="correct">
     {String.fromCharCode(10003)}
   </span>
 )
 
-const Incorrect: React.FC = () => (
+const Incorrect = () => (
   <span className="incorrect">
     x
   </span>
 )
 
-export const QuizResults: React.FC = (props: {quiz: ApiQuiz, answers: ApiActiveAnswer[]}) => {
+export const QuizResults = (props: {quiz: ApiQuiz, answers: ApiActiveAnswer[]}) => {
   const { quiz, answers } = props;
 
   return quiz && answers.length ? (
@@ -86,6 +86,14 @@ export const QuizResults: React.FC = (props: {quiz: ApiQuiz, answers: ApiActiveA
         })}
       </ul>
       </CardContent>
+			<CardFooter className="flex justify-between pt-8">
+				<Link
+					to={rootPath.pattern}
+					className="text-muted-foreground hover:text-blue-600"
+				>
+					Back to home page
+				</Link>
+			</CardFooter>
     </Card>
   ) : null;
 }

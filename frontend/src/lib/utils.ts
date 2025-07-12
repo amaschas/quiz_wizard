@@ -50,7 +50,7 @@ export const checkQuizComplete = (user: ApiUser, quizId: string): boolean => {
 
 export const getAdjacentQuestionId = (
   currentId: number,
-  questions: AppQuizQuestion[],
+  questions: ApiQuizQuestion[],
   direction: "next" | "prev"
 ): number => {
   const currentIndex = questions.findIndex(question => question.id === currentId);

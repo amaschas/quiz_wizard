@@ -21,7 +21,6 @@ services:
       - quiz-backend
     volumes:
       - ./frontend:/app/
-      - ./biome.json:/app/biome.json
       - /app/node_modules
       - /app/dist
     env_file:

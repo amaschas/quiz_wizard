@@ -41,17 +41,8 @@ export interface AnswerChangeArgs {
   sec_on_question?: number;
 }
 
-export const QuizAnswerChoice = (props: {selected: boolean}) => {
-  const { selected } = props;
-  return (
-    <li>
-      <Checkbox checked={selected} />
-    </li>
-  )
-}
-
 const getQuizProgress = (quiz: ApiQuiz, activeAnswer: ApiActiveAnswer): { current: number, total: number } => {
-  const current = quiz?.questions.findIndex(question => question.id === activeAnswer.quiz_question_id);
+  const current = quiz?.questions ? quiz?.questions.findIndex(question => question.id === activeAnswer.quiz_question_id) : 0;
 
   return {
     current,
@@ -169,7 +160,7 @@ export const QuizPage = () => {
   }
 
   // Update the user record to indicate the user has completed the quiz
-  const setQuizComplete = async (args: {user_id: number, quiz_id: string}) => {
+  const setQuizComplete = async (args: {user_id: number, quiz_id: number}) => {
     try {
       const res = await fetch(userSetQuizCompleteApiUrl({}), {
         method: "POST",
@@ -207,7 +198,7 @@ export const QuizPage = () => {
   
     // If we have a quiz but not active answer
     // activate the first answer in the quiz
-    if (quiz && quiz?.questions && !activeAnswerSet) {
+    if (quiz && !activeAnswerSet) {
       handleAnswerChange({
         user_id: USER_ID,
         quiz_id: quiz.id,

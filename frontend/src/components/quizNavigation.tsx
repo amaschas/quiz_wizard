@@ -1,14 +1,14 @@
-import {
-	CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
 import type {
   ApiUser,
   ApiQuiz,
   ApiActiveAnswer,
 } from "@/components/quiz";
 import type { AnswerChangeArgs } from "@/pages/quiz";
+
+import {
+	CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { getAdjacentQuestionId } from "@/lib/utils";
 
 export const QuizNavigation = (props: {
@@ -16,7 +16,7 @@ export const QuizNavigation = (props: {
   quiz: ApiQuiz,
   activeAnswer: ApiActiveAnswer,
   secondsElapsed: number,
-  setQuizComplete: (args: {user_id: number, quiz_id: string}) => void,
+  setQuizComplete: (args: {user_id: number, quiz_id: number}) => void,
   fetchUser: () => void,
   setDoShuffle: (doShuffle: boolean) => void,
   handleAnswerChange: (args: AnswerChangeArgs) => void,
@@ -36,7 +36,7 @@ export const QuizNavigation = (props: {
     setSecondsElapsed
   } = props;
   
-  return (
+  return activeAnswer && quiz && quiz?.questions ? (
     <CardContent>
       <Button
         className="back-button"
@@ -114,5 +114,5 @@ export const QuizNavigation = (props: {
         Submit
       </Button>
     </CardContent>
-  );
+  ) : null;
 }

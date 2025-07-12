@@ -120,13 +120,19 @@ interface AppQuizAnswerChoice {
 }
 ```
 
+### Thoughts and Possible Revisions
+
+I think that the biggest drawback to my approach is that the data fetching interfaces are effectively all embedded within the QuizPage component. This made them hard to share, and I ended up having to duplicate `fetchUser` for the quizzes landing page as a result. A unified API interface is generally a good thing to have in a frontend application.
+
+I kept my styling and CSS modifications to a minimum, and my generaly approach involves some SCSS-specific strategies and I didn't want to go down the rabbit hole of adding a compiler to the build.
+
 ## (If you didn't go with the boilerplate) Notes on design/architecture and rationale
 
 My solution used the boilerplate for the most part, though I did make one significant change in that I dockerized the setup to ensure it ran smoothly in any environment.
 
 ## Feedback for Stepful
 
-The SQLite migrations didn't run successfully at first, as the syntax for the seeded quiz data was invalid. Other than that everything worked great!
+The SQLite migrations didn't run successfully at first, as the syntax for the seeded quiz data was invalid. There were also some tab/space inconsistencies in the backend vs. the frontend. Other than that everything worked great!
 
 ## Anything else you'd like us to know?
 
