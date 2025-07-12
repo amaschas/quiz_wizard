@@ -61,7 +61,7 @@ The API endpoints generally trust that the entities in question exist, which can
 
 The endpoint that does the most work here is `POST /quiz/answer`. This is used both as a mechanism to record user progress in the quiz and the duration of time spent on a question, in addition to enabling navigation.
 
-Some basic documentation of the available API endpoints is available [here](/docs/api_docs).
+Some basic documentation of the available API endpoints is available [here](/docs/api_docs.md).
 
 ### Navigating The Quiz
 
