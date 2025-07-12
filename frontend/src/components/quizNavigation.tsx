@@ -11,31 +11,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { getAdjacentQuestionId } from "@/lib/utils";
 
-export const QuizNavigation = (props: {
-  user: ApiUser,
-  quiz: ApiQuiz,
-  activeAnswer: ApiActiveAnswer,
-  secondsElapsed: number,
-  setQuizComplete: (args: {user_id: number, quiz_id: number}) => void,
-  fetchUser: () => void,
-  setDoShuffle: (doShuffle: boolean) => void,
-  handleAnswerChange: (args: AnswerChangeArgs) => void,
-  updateAnswerDuration: (questionId: number, numSeconds: number) => void,
-  setSecondsElapsed: (secondsElapsed: number) => void
-}) => {
-  const {
-    user,
-    quiz,
-    activeAnswer,
-    secondsElapsed,
-    setQuizComplete,
-    fetchUser,
-    setDoShuffle,
-    handleAnswerChange,
-    updateAnswerDuration,
-    setSecondsElapsed
-  } = props;
-  
+interface QuizNavigationProps {
+  user: ApiUser;
+  quiz: ApiQuiz;
+  activeAnswer: ApiActiveAnswer;
+  secondsElapsed: number;
+  setQuizComplete: (args: { user_id: number; quiz_id: number }) => void;
+  fetchUser: () => void;
+  setDoShuffle: (doShuffle: boolean) => void;
+  handleAnswerChange: (args: AnswerChangeArgs) => void;
+  updateAnswerDuration: (questionId: number, numSeconds: number) => void;
+  setSecondsElapsed: (secondsElapsed: number) => void;
+}
+
+export const QuizNavigation = ({
+  user,
+  quiz,
+  activeAnswer,
+  secondsElapsed,
+  setQuizComplete,
+  fetchUser,
+  setDoShuffle,
+  handleAnswerChange,
+  updateAnswerDuration,
+  setSecondsElapsed,
+}: QuizNavigationProps) => {
   return activeAnswer && quiz && quiz?.questions ? (
     <CardContent>
       <Button

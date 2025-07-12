@@ -120,11 +120,13 @@ interface AppQuizAnswerChoice {
 }
 ```
 
-### Thoughts and Possible Revisions
+### Thoughts and Possible Changes
 
 I think that the biggest drawback to my approach is that the data fetching interfaces are effectively all embedded within the QuizPage component. This made them hard to share, and I ended up having to duplicate `fetchUser` for the quizzes landing page as a result. A unified API interface is generally a good thing to have in a frontend application.
 
 I kept my styling and CSS modifications to a minimum, and my generaly approach involves some SCSS-specific strategies and I didn't want to go down the rabbit hole of adding a compiler to the build.
+
+I had also intended to create a mechanism to select a user and provide the user data globally but ran out of time, hence the stubbed user IDs.
 
 ## (If you didn't go with the boilerplate) Notes on design/architecture and rationale
 

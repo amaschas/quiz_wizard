@@ -57,9 +57,12 @@ const Incorrect = () => (
   </span>
 )
 
-export const QuizResults = (props: {quiz: ApiQuiz, answers: ApiActiveAnswer[]}) => {
-  const { quiz, answers } = props;
+interface QuizResultsProps {
+  quiz: ApiQuiz;
+  answers: ApiActiveAnswer[];
+}
 
+export const QuizResults = ({ quiz, answers }: QuizResultsProps) => {
   return quiz && answers.length ? (
     <Card>
       <CardHeader className="pb-8">
