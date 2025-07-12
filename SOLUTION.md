@@ -4,10 +4,11 @@ By Alexander Maschas (alexi.maschas@gmail.com)
 
 ## Notes on implementation
 
-My implementation began with a focus on the data modeling and the API design. The boilerplate provided a decent starting point for the build, but required some means of tracking answers to questions and retaining the state of those answers. I reduced the problem down to two basic requirements:
+My implementation began with a focus on the data modeling and the API design. The boilerplate provided a decent starting point for the build, but required some means of tracking answers to questions and retaining the state of those answers. I reduced the problem down to three basic requirements:
 
-* Track which question in a given quiz was active for a given user, and which answer was chosen, if any.
+* Track which question in a given quiz was active for a given user, and which answer was chosen.
 * Track whether a given user had completed a given quiz.
+* Track the amount of time a user spent taking a quiz.
 
 ### API Models
 
@@ -41,7 +42,7 @@ QuizQuestion {
 }
 ```
 
-The user record gained a `quizzed_completed` field, which allows the quiz to determine which quizzes the user has completed.
+The user record gained a `quizzes_completed` field, which allows the quiz to determine which quizzes the user has completed.
 
 ```
 User {
@@ -51,6 +52,16 @@ User {
     quizzes_completed: string;
 }
 ```
+
+### API Endpoints
+
+I used a fairly basic approach for my API design, with read endpoints for individual models and arrays of models. I strove for consistency in the design, returning consistent data types (`null` if individual records were not found, empty arrays if list records are not found).
+
+The API endpoints generally trust that the entities in question exist, which can make sense for an API that is entirely internal to a specific implementation, but more robust handling (404s for entities not found, handling the error on the frontend and setting state appropriately) is definitely preferred.
+
+The endpoint that does the most work here is `POST /quiz/answer`. This is used both as a mechanism to record user progress in the quiz and the duration of time spent on a question, in addition to enabling navigation.
+
+Some basic documentation of the available API endpoints is available [here](/docs/api_docs).
 
 ### Navigating The Quiz
 
@@ -122,11 +133,13 @@ interface AppQuizAnswerChoice {
 
 ### Thoughts and Possible Changes
 
+I focussed mostly on what I thought of as the core functionality of the quiz: taking the quiz itself, keeping state, scoring and tracking duration. I decided not to implement the feature that allowed different point values for questions, and the LLM supported question answering. I had also intended to create a mechanism to select a user and provide the user data globally but ran out of time, hence the stubbed user IDs.
+
 I think that the biggest drawback to my approach is that the data fetching interfaces are effectively all embedded within the QuizPage component. This made them hard to share, and I ended up having to duplicate `fetchUser` for the quizzes landing page as a result. A unified API interface is generally a good thing to have in a frontend application.
 
-I kept my styling and CSS modifications to a minimum, and my generaly approach involves some SCSS-specific strategies and I didn't want to go down the rabbit hole of adding a compiler to the build.
+I would have also liked to spend more time ensuring the API endpoints generated the correct codes and response in all cases, and taken the time to have the frontend API interface properly handle those codes.
 
-I had also intended to create a mechanism to select a user and provide the user data globally but ran out of time, hence the stubbed user IDs.
+I kept my styling and CSS modifications to a minimum, and my generaly approach involves some SCSS-specific strategies and I didn't want to go down the rabbit hole of adding a compiler to the build.
 
 ## (If you didn't go with the boilerplate) Notes on design/architecture and rationale
 
